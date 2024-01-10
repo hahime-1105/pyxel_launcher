@@ -14,6 +14,7 @@ BULLET_SPEED = 4
 ENEMY_WIDTH = 16
 ENEMY_HEIGHT = 16
 ENEMY_SPEED = 2
+ENEMY_FPS = 4
 ENEMY_RATE = 30
 
 BLAST_START_RADIUS = 1
@@ -133,7 +134,9 @@ class Enemy1:
         self.y = y
         self.w = ENEMY_WIDTH
         self.h = ENEMY_HEIGHT
+        self.f = ENEMY_FPS
         self.is_alive = True
+        self.d_img = 32
         enemies.append(self)
 
     def update(self):
@@ -142,7 +145,12 @@ class Enemy1:
             self.is_alive = False
 
     def draw(self):
-        pyxel.blt(self.x, self.y, 0, 32, 0, self.w, self.h, 12)
+        if pyxel.frame_count % self.f == 0:
+            if self.d_img == 32:
+                self.d_img = 48
+            else:
+                self.d_img = 32
+        pyxel.blt(self.x, self.y, 0, self.d_img, 0, self.w, self.h, 12)
 
 
 class Blast:
