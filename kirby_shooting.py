@@ -5,7 +5,7 @@ PLAYER_HEIGHT = 16
 PLAYER_SPEED = 2
 PLAYER_LIFE = 5
 PLAYER_FPS = 5
-PLAYER_MOTION = 15
+PLAYER_MOTION = 10
 
 BULLET_WIDTH = 16
 BULLET_HEIGHT = 16
@@ -207,7 +207,7 @@ class App:
                         Blast(enemy.x + ENEMY_WIDTH / 2, enemy.y + ENEMY_HEIGHT / 2)
                     )
                     pyxel.play(2, 8)
-                    self.score += 50
+                    self.score += 100
 
         for enemy in enemies:  # 敵と自機の当たり判定
             if (
