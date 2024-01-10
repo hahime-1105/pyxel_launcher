@@ -174,7 +174,7 @@ class Blast:
 class App:
     def __init__(self):
         pyxel.init(160, 120, title="じゃがバターシューティング")
-        pyxel.load("assets/kirby.pyxres")
+        pyxel.load("assets/kirby_0110.pyxres")
         self.score = -10
         self.rate = ENEMY_RATE
         self.rateup = 200
