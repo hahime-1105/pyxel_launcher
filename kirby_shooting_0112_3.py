@@ -406,6 +406,7 @@ class App:
         pyxel.text(5, 4, s, 1)
         pyxel.text(4, 4, s, 7)
         pyxel.text(50, 4, f"{pyxel.mouse_x}", 1)
+        pyxel.text(80, 4, f"{pyxel.mouse_y}", 1)
         for i in range(PLAYER_LIFE):
             if self.player.l > i:
                 pyxel.blt(100 + (i * 9), 2, 0, 112, 0, 8, 8, 12)
