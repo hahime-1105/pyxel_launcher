@@ -310,16 +310,17 @@ class App:
         pyxel.load('assets\\tadashi_pokemon.pyxres')
         pyxel.playm(0)
 
-        self.emboar = Pokemon('エンブオー', 176, 135, 93, 112, 94, 97, )
-        self.galvantula = Pokemon('デンチュラ', 136, 87, 77, 177, 76, 112, )
-        self.unfezant = Pokemon('ケンホロウ', 138, 118, 88, 69, 65, 100, )
-        self.seismitoad = Pokemon('ガマゲロゲ', 164, 111, 87, 93, 88, 85, )
-        self.deino = Pokemon('モノズ', 98, 58, 51, 42, 46, 45, )
-        self.gigigiaru = Pokemon('ギギギアル', 135, 120, 135, 90, 105, 110, )
-        self.abagora = Pokemon('アバゴーラ', 149, 128, 153, 103, 85, 52, )
-        self.akeosu = Pokemon('アーケオス', 150, 160, 85, 132, 85, 130, )
-        self.baibanira = Pokemon('バイバニラ', 146, 115, 105, 130, 115, 99, )
-        self.zoroaku = Pokemon('ゾロアーク', 135, 125, 80, 140, 80, 125, )
+        # self.emboar = Pokemon('エンブオー', 176, 135, 93, 112, 94, 97, )
+        # self.galvantula = Pokemon('デンチュラ', 136, 87, 77, 177, 76, 112, )
+        # self.unfezant = Pokemon('ケンホロウ', 138, 118, 88, 69, 65, 100, )
+        # self.seismitoad = Pokemon('ガマゲロゲ', 164, 111, 87, 93, 88, 85, )
+        # self.deino = Pokemon('モノズ', 98, 58, 51, 42, 46, 45, )
+        # self.gigigiaru = Pokemon('ギギギアル', 135, 120, 135, 90, 105, 110, )
+        # self.abagora = Pokemon('アバゴーラ', 149, 128, 153, 103, 85, 52, )
+        # self.akeosu = Pokemon('アーケオス', 150, 160, 85, 132, 85, 130, )
+        # self.baibanira = Pokemon('バイバニラ', 146, 115, 105, 130, 115, 99, )
+        # self.zoroaku = Pokemon('ゾロアーク', 135, 125, 80, 140, 80, 125, )
+
         self.zekrom = Pokemon('ゼクロム', 182, 177, 145, 145, 125, 114, Cmd.Fusion_Bolt, Cmd.Dragon_Claw,
                               Cmd.Zen_Headbutt, Cmd.Giga_Impact, Ele.Electric, Ele.Dragon, 52, [0, 0], False)
         self.reshiram = Pokemon('レシラム', 175, 140, 120, 170, 140, 110, Cmd.Fusion_Flare, Cmd.Dragon_Breath,
