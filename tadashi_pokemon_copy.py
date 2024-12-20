@@ -180,41 +180,12 @@ def draw_opp_poke(poke):
     pyxel.rect(name_x + 10, name_y + 8, (50 * poke.h / poke.h_max), 5, 10)
 
 
-class BattleStatus:
-    def __init__(self):
-        self.battle_now = '-neutral-'
-        self.knockout = '-none-'
-        self.delay = 0
-        self.damage = 0
-        self.hp_count = 0
-        self.hp_bef = 0
-        self.player_cmd = None
-        self.cpu_cmd = None
+def update_battle_status(delay, player_cmd, cpu_cmd, senkou, knockout):
+    if delay == 0 and player_cmd is None and cpu_cmd is None and senkou is None:
+        return '-input-'
 
-        # プレイヤーが先攻ならTrue
-        self.senkou = None
-
-    def update_battle_now(self):
-        if self.delay == 0:
-
-            if self.player_cmd is None and self.cpu_cmd is None and self.senkou is None:
-                self.battle_now = '-input-'
-
-            elif self.senkou is not None and self.hp_bef == 0:
-                self.battle_now = '-damage-'
-
-            elif self.senkou and self.player_cmd is not None and self.hp_bef != 0:
-                self.battle_now = '-player_attack-'
-                if (self.hp_bef - self.damage) <= 0:
-                    self.knockout = '-cpu-'
-
-            elif self.senkou and self.cpu_cmd is not None and self.hp_bef != 0:
-                self.battle_now = '-cpu_attack-'
-                if (self.hp_bef - self.damage) <= 0:
-                    self.knockout = '-player-'
-
-        if self.delay > 0:
-            self.delay -= 1
+    if delay == 0 and senkou is not None and (player_cmd is not None or cpu_cmd is not None):
+        return '-damage-'
 
 
 class App:
@@ -225,11 +196,18 @@ class App:
         pyxel.playm(0)
 
         # 場面設定
-        self.param = BattleStatus()
         self.scene = '-battle-'
+        self.battle_status = '-neutral-'
+        self.knockout = '-none-'
 
         # イントロの終了
         self.end = True
+        # 演出の遅延時間
+        self.delay = 0
+        # HPバーの表示
+        self.damage = 0
+        self.hp_count = 0
+        self.hp_bef = 0
 
         # 各プレイヤー
         self.t = base.tadashi()
@@ -237,7 +215,12 @@ class App:
 
         # プレイヤーの行動選択のクラス
         self.choice = Choice(self.t.field())
+        self.player_cmd = None
         self.turn = Turn(self.t.field(), self.n.field())
+        # CPUの行動
+        self.cpu_cmd = None
+        # プレイヤーが先攻ならTrue
+        self.senkou = None
 
         pyxel.run(self.update, self.draw)
 
@@ -250,95 +233,100 @@ class App:
 
         if self.scene == '-battle-':
 
-            self.param.update_battle_now()
+            self.battle_status = update_battle_status(
+                self.delay, self.player_cmd, self.cpu_cmd, self.senkou, self.knockout
+            )
 
             # プレイヤーの行動入力
-            if self.param.battle_now == '-input-':
-                self.param.player_cmd = self.choice.up_player_choice()
+            if self.battle_status == '-input-':
+                self.player_cmd = self.choice.up_player_choice()
 
                 # プレイヤーの行動が入力されたら
-                if self.param.player_cmd is not None:
+                if self.player_cmd is not None:
                     # CPUの攻撃をランダムに選択
-                    self.param.cpu_cmd = pyxel.rndi(0, 3)
+                    self.cpu_cmd = pyxel.rndi(0, 3)
                     # 先攻を判定
-                    self.param.senkou = self.turn.senkou()
+                    self.senkou = self.turn.senkou()
 
             # ダメ計
-            if self.param.battle_now == '-damage-':
-                self.param.delay = 60
-                if self.param.senkou:
-                    self.param.hp_bef = self.n.field().h
-                    self.param.damage = self.turn.up_attack(self.param.senkou,
-                                                            self.t.field().cmd[self.param.player_cmd])
-                    self.param.hp_count = int(self.param.damage / 30)
+            if self.battle_status == '-damage-':
+                self.delay = 60
+                if self.senkou:
+                    self.hp_bef = self.n.field().h
+                    self.damage = self.turn.up_attack(my_flag=self.senkou, cmd=self.t.field().cmd[self.player_cmd])
+                    self.hp_count = int(self.damage / 30)
                     self.choice = Choice(self.t.field())
 
-                if not self.param.senkou:
-                    self.param.hp_bef = self.t.field().h
-                    self.param.damage = self.turn.up_attack(self.param.senkou, self.n.field().cmd[self.param.cpu_cmd])
-                    self.param.hp_count = int(self.param.damage / 30)
+                if not self.senkou:
+                    self.hp_bef = self.t.field().h
+                    self.damage = self.turn.up_attack(my_flag=self.senkou, cmd=self.n.field().cmd[self.cpu_cmd])
+                    self.hp_count = int(self.damage / 30)
                     self.choice = Choice(self.n.field())
 
+            # 画面演出の遅延
+            if self.delay >= 1:
+                self.delay -= 1
+
             # 現在HPを更新
-            if self.param.senkou is not None:
+            if self.senkou is not None:
                 # プレイヤーの攻撃描画
-                if self.param.senkou:
-                    self.n.field().h = self.n.field().h - self.param.hp_count
+                if self.senkou:
+                    self.n.field().h = self.n.field().h - self.hp_count
 
                     # HPが0になった
                     if self.n.field().h <= 0:
                         self.n.field().h = 0
-                        self.param.damage = 0
-                        self.param.hp_count = 0
-                        self.param.hp_bef = 0
-                        self.param.player_cmd = None
-                        self.param.knockout = '-cpu-'
+                        self.damage = 0
+                        self.hp_count = 0
+                        self.hp_bef = 0
+                        self.player_cmd = None
+                        self.knockout = '-cpu-'
 
                     # HPバーの処理が完了
-                    if self.n.field().h < (self.param.hp_bef - self.param.damage):
-                        self.n.field().h = self.param.hp_bef - self.param.damage
-                        self.param.damage = 0
-                        self.param.hp_count = 0
-                        self.param.hp_bef = 0
-                        self.param.player_cmd = None
+                    if self.n.field().h < (self.hp_bef - self.damage):
+                        self.n.field().h = self.hp_bef - self.damage
+                        self.damage = 0
+                        self.hp_count = 0
+                        self.hp_bef = 0
+                        self.player_cmd = None
 
                 # cpuの攻撃描画
-                if not self.param.senkou:
-                    self.t.field().h = self.t.field().h - self.param.hp_count
+                if not self.senkou:
+                    self.t.field().h = self.t.field().h - self.hp_count
 
                     if self.t.field().h <= 0:
                         self.t.field().h = 0
-                        self.param.damage = 0
-                        self.param.hp_count = 0
-                        self.param.hp_bef = 0
-                        self.param.cpu_cmd = None
-                        self.param.knockout = '-player-'
+                        self.damage = 0
+                        self.hp_count = 0
+                        self.hp_bef = 0
+                        self.cpu_cmd = None
+                        self.knockout = '-player-'
 
-                    if self.t.field().h < (self.param.hp_bef - self.param.damage):
-                        self.t.field().h = self.param.hp_bef - self.param.damage
-                        self.param.damage = 0
-                        self.param.hp_count = 0
-                        self.param.hp_bef = 0
-                        self.param.cpu_cmd = None
+                    if self.t.field().h < (self.hp_bef - self.damage):
+                        self.t.field().h = self.hp_bef - self.damage
+                        self.damage = 0
+                        self.hp_count = 0
+                        self.hp_bef = 0
+                        self.cpu_cmd = None
 
-                if self.param.knockout == '-none-':
+                if self.knockout == '-none-':
                     # 次のターンにいく
-                    if self.param.player_cmd is None and self.param.cpu_cmd is None and self.param.delay == 0:
-                        self.param.senkou = None
+                    if self.player_cmd is None and self.cpu_cmd is None and self.delay == 0:
+                        self.senkou = None
                         self.choice = Choice(self.t.field())
 
                     # 後攻の攻撃を処理
-                    elif (self.param.player_cmd is None or self.param.cpu_cmd is None) and self.param.delay == 0:
-                        self.param.senkou = not self.param.senkou
+                    elif (self.player_cmd is None or self.cpu_cmd is None) and self.delay == 0:
+                        self.senkou = not self.senkou
                         print('攻守交替')
 
-                if self.param.knockout == '-cpu-' and self.param.delay == 0:
+                if self.knockout == '-cpu-' and self.delay == 0:
                     self.n.now += 1
-                    self.param.senkou = None
-                    self.param.cpu_cmd = None
+                    self.senkou = None
+                    self.cpu_cmd = None
                     self.choice = Choice(self.t.field())
                     self.turn = Turn(self.t.field(), self.n.field())
-                    self.param.knockout = '-none-'
+                    self.knockout = '-none-'
 
     def draw(self):
 
@@ -352,14 +340,14 @@ class App:
             draw_my_poke(self.t.field())
             draw_opp_poke(self.n.field())
             # テキストを描画
-            if self.param.player_cmd is None and self.param.cpu_cmd is None and self.param.delay == 0:
+            if self.player_cmd is None and self.cpu_cmd is None and self.delay == 0:
                 self.choice.dw_player_choice()
 
-            if (self.param.player_cmd is not None or self.param.cpu_cmd is not None) and self.param.delay > 5:
-                if self.param.senkou and self.param.player_cmd is not None:
-                    self.turn.dw_attack(my_flag=self.param.senkou, cmd=self.t.field().cmd[self.param.player_cmd])
-                if not self.param.senkou and self.param.cpu_cmd is not None:
-                    self.turn.dw_attack(my_flag=self.param.senkou, cmd=self.n.field().cmd[self.param.cpu_cmd])
+            if (self.player_cmd is not None or self.cpu_cmd is not None) and self.delay > 5:
+                if self.senkou and self.player_cmd is not None:
+                    self.turn.dw_attack(my_flag=self.senkou, cmd=self.t.field().cmd[self.player_cmd])
+                if not self.senkou and self.cpu_cmd is not None:
+                    self.turn.dw_attack(my_flag=self.senkou, cmd=self.n.field().cmd[self.cpu_cmd])
 
 
 App()
