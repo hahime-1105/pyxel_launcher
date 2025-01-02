@@ -1,6 +1,7 @@
 import pyxel
 from enum import Enum
 
+
 # タイプ相性の表示
 class Efficacy(Enum):
     Twice = 'こうかは　ばつぐんだ！'
@@ -643,10 +644,10 @@ class PokemonChange:
 
         if self.tmp_cursor is None:
 
-            if pyxel.btnp(pyxel.KEY_Z or pyxel.GAMEPAD1_BUTTON_A) and self_change:
+            if (pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and self_change:
                 self.rtn_cmd = 100
 
-            if pyxel.btnp(pyxel.KEY_SPACE or pyxel.GAMEPAD1_BUTTON_B):
+            if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
                 if self.tmp_cmd == self.trainer.now:
                     self.tmp_cursor = 1
                 else:
@@ -658,10 +659,10 @@ class PokemonChange:
                 if self.tmp_cmd < 5:
                     self.tmp_cmd += 1
         else:
-            if pyxel.btnp(pyxel.KEY_Z or pyxel.GAMEPAD1_BUTTON_A):
+            if pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
                 self.tmp_cursor = None
 
-            if pyxel.btnp(pyxel.KEY_SPACE or pyxel.GAMEPAD1_BUTTON_B):
+            if pyxel.btnp(pyxel.KEY_SPACE) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
                 if self.list[self.tmp_cursor] == ChangeCursor.Cancel:
                     self.tmp_cursor = None
 
@@ -959,11 +960,11 @@ class App:
             if self.param.delay < 120 and self.param.delay > 65:
                 pyxel.text(10, 102, 'プラズマだんの　N は', 0, font)
                 pyxel.text(10, 111, 'ゼクロム　を　くりだした！', 0, font)
-            if self.param.delay>65:
-                pyxel.blt(25,50,0,48,64,48,48)
-            if self.param.delay<40:
+            if self.param.delay > 65:
+                pyxel.blt(25, 50, 0, 48, 64, 48, 48)
+            if self.param.delay < 40:
                 draw_my_poke(self.t.field())
-            if self.param.delay<55 and self.param.delay>5:
+            if self.param.delay < 55 and self.param.delay > 5:
                 pyxel.text(10, 102, f'ゆけっ！　{self.t.field().name}！', 0, font)
 
         if self.param.scene == '-change_input-':
