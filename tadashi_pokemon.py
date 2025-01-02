@@ -1,5 +1,3 @@
-from sys import dont_write_bytecode
-
 import pyxel
 from assets import pokemon_base as base
 

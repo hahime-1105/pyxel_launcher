@@ -1,8 +1,4 @@
 from enum import Enum
-from wsgiref.util import request_uri
-
-from setuptools.sandbox import run_setup
-
 
 # タイプ相性の表示
 class Efficacy(Enum):
