@@ -1,4 +1,35 @@
 from enum import Enum
+from wsgiref.util import request_uri
+
+from setuptools.sandbox import run_setup
+
+
+# タイプ相性の表示
+class Efficacy(Enum):
+    Twice = 'こうかは　ばつぐんだ！'
+    Half = 'こうかは　いまひとつの　ようだ…'
+    Invalid = 'こうはは　ないようだ…'
+    Miss = 'こうげきは　あたらなかった！'
+    Critical = 'きゅうしょに　あたった！'
+
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return self.name
+
+
+# ポケモン交換の選択
+class ChangeCursor(Enum):
+    Change = 'いれかえる'
+    Status = 'つよさをみる'
+    Cancel = 'やめる'
+
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return self.name
 
 
 # ポケモンのタイプ
@@ -55,7 +86,7 @@ class Cmd:
     Fusion_Bolt = ['クロスサンダー', Ele.Electric, Cat.physical, 100, 100, 5, eff.none()]
     Dragon_Breath = ['りゅうのいぶき', Ele.Dragon, Cat.special, 60, 100, 20, eff.none()]
     Dragon_Claw = ['ドラゴンクロー', Ele.Dragon, Cat.physical, 80, 100, 15, eff.none()]
-    Hyper_Beam = ['はかいこうせん', Ele.Normal, Cat.special, 400, 90, 5, eff.none()]
+    Hyper_Beam = ['はかいこうせん', Ele.Normal, Cat.special, 150, 60, 5, eff.none()]
     Giga_Impact = ['ギガインパクト', Ele.Normal, Cat.physical, 150, 90, 5, eff.none()]
     Zen_Headbutt = ['しねんのずつき', Ele.Psychic, Cat.physical, 80, 90, 15, eff.none()]
     Extrasensory = ['じんつうりき', Ele.Psychic, Cat.special, 80, 100, 30, eff.none()]
@@ -92,7 +123,149 @@ class Cmd:
 
 # タイプ相性
 def comp(atk_ele, dff_ele):
-    return 1
+    if dff_ele is None:
+        return 1
+    else:
+        if atk_ele == Ele.Normal:
+            if dff_ele == Ele.Ghost:
+                return 0
+            elif dff_ele == Ele.Rock or dff_ele == Ele.Steel:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Fire:
+            if dff_ele == Ele.Grass or dff_ele == Ele.Ice or dff_ele == Ele.Bug or dff_ele == Ele.Steel:
+                return 2
+            elif dff_ele == Ele.Fire or dff_ele == Ele.Water or dff_ele == Ele.Rock or dff_ele == Ele.Dragon:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Water:
+            if dff_ele == Ele.Fire or dff_ele == Ele.Ground or dff_ele == Ele.Rock:
+                return 2
+            elif dff_ele == Ele.Water or dff_ele == Ele.Grass or dff_ele == Ele.Dragon:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Electric:
+            if dff_ele == Ele.Ground:
+                return 0
+            elif dff_ele == Ele.Water or dff_ele == Ele.Flying:
+                return 2
+            elif dff_ele == Ele.Electric or dff_ele == Ele.Grass or dff_ele == Ele.Dragon:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Grass:
+            if dff_ele == Ele.Water or dff_ele == Ele.Grass or dff_ele == Ele.Rock:
+                return 2
+            elif dff_ele == Ele.Fire or dff_ele == Ele.Grass or dff_ele == Ele.Poison or dff_ele == Ele.Flying or dff_ele == Ele.Bug or dff_ele == Ele.Dragon or dff_ele == Ele.Steel:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Ice:
+            if dff_ele == Ele.Grass or dff_ele == Ele.Ground or dff_ele == Ele.Flying or dff_ele == Ele.Dragon:
+                return 2
+            elif dff_ele == Ele.Fire or dff_ele == Ele.Water or dff_ele == Ele.Ice or dff_ele == Ele.Steel:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Fighting:
+            if dff_ele == Ele.Normal or dff_ele == Ele.Ice or dff_ele == Ele.Rock or dff_ele == Ele.Dark or dff_ele == Ele.Steel:
+                return 2
+            elif dff_ele == Ele.Poison or dff_ele == Ele.Flying or dff_ele == Ele.Psychic or dff_ele == Ele.Bug or dff_ele == Ele.Fairy:
+                return 0.5
+            elif dff_ele == Ele.Ghost:
+                return 0
+            else:
+                return 1
+        if atk_ele == Ele.Poison:
+            if dff_ele == Ele.Grass or dff_ele == Ele.Fairy:
+                return 2
+            elif dff_ele == Ele.Poison or dff_ele == Ele.Ground or dff_ele == Ele.Rock or dff_ele == Ele.Ghost:
+                return 0.5
+            elif dff_ele == Ele.Steel:
+                return 0
+            else:
+                return 1
+        if atk_ele == Ele.Ground:
+            if dff_ele == Ele.Fire or dff_ele == Ele.Electric or dff_ele == Ele.Poison or dff_ele == Ele.Rock or dff_ele == Ele.Steel:
+                return 2
+            elif dff_ele == Ele.Grass or dff_ele == Ele.Bug:
+                return 0.5
+            elif dff_ele == Ele.Flying:
+                return 0
+            else:
+                return 1
+        if atk_ele == Ele.Flying:
+            if dff_ele == Ele.Grass or dff_ele == Ele.Fighting or dff_ele == Ele.Bug:
+                return 2
+            if dff_ele == Ele.Electric or dff_ele == Ele.Rock or dff_ele == Ele.Steel:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Psychic:
+            if dff_ele == Ele.Fighting or dff_ele == Ele.Poison:
+                return 2
+            elif dff_ele == Ele.Psychic or dff_ele == Ele.Steel:
+                return 0.5
+            elif dff_ele == Ele.Dark:
+                return 0
+            else:
+                return 1
+        if atk_ele == Ele.Bug:
+            if dff_ele == Ele.Grass or dff_ele == Ele.Psychic or dff_ele == Ele.Dark:
+                return 2
+            elif dff_ele == Ele.Fire or dff_ele == Ele.Fighting or dff_ele == Ele.Poison or dff_ele == Ele.Flying or dff_ele == Ele.Ghost or dff_ele == Ele.Steel or dff_ele == Ele.Fairy:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Rock:
+            if dff_ele == Ele.Fire or dff_ele == Ele.Ice or dff_ele == Ele.Flying or dff_ele == Ele.Bug:
+                return 2
+            elif dff_ele == Ele.Fighting or dff_ele == Ele.Ground or dff_ele == Ele.Steel:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Ghost:
+            if dff_ele == Ele.Psychic or dff_ele == Ele.Ghost:
+                return 2
+            elif dff_ele == Ele.Dark:
+                return 0.5
+            elif dff_ele == Ele.Normal:
+                return 0
+            else:
+                return 1
+        if atk_ele == Ele.Dragon:
+            if dff_ele == Ele.Dragon:
+                return 2
+            elif dff_ele == Ele.Steel:
+                return 0.5
+            elif dff_ele == Ele.Fairy:
+                return 0
+            else:
+                return 1
+        if atk_ele == Ele.Dark:
+            if dff_ele == Ele.Psychic or dff_ele == Ele.Ghost:
+                return 2
+            elif dff_ele == Ele.Fighting or dff_ele == Ele.Dark or dff_ele == Ele.Fairy:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Steel:
+            if dff_ele == Ele.Ice or dff_ele == Ele.Rock or dff_ele == Ele.Fairy:
+                return 2
+            elif dff_ele == Ele.Fire or dff_ele == Ele.Water or dff_ele == Ele.Electric or dff_ele == Ele.Steel:
+                return 0.5
+            else:
+                return 1
+        if atk_ele == Ele.Fairy:
+            if dff_ele == Ele.Fire or dff_ele == Ele.Poison or dff_ele == Ele.Steel:
+                return 0.5
+            elif dff_ele == Ele.Fighting or dff_ele == Ele.Dragon or dff_ele == Ele.Dark:
+                return 2
+            else:
+                return 1
 
 
 class Input(Enum):
@@ -221,9 +394,8 @@ def plasma_n():
         Cmd.Night_Slash, Cmd.Flamethrower, Cmd.Focus_Blast, Cmd.Retaliate,
         Ele.Dark, None, 50, [96, 32]
     )
-    #s=114
     zekrom = Pokemon(
-        'ゼクロム', 182, 177, 145, 145, 125, 11,
+        'ゼクロム', 182, 177, 145, 145, 125, 114,
         Cmd.Fusion_Bolt, Cmd.Dragon_Claw, Cmd.Zen_Headbutt, Cmd.Giga_Impact,
         Ele.Electric, Ele.Dragon, 52, [0, 32]
     )
