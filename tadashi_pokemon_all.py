@@ -662,10 +662,10 @@ class PokemonChange:
                 self.tmp_cursor = None
 
             if pyxel.btnp(pyxel.KEY_SPACE or pyxel.GAMEPAD1_BUTTON_B):
-                if self.list[self.tmp_cursor] == base.ChangeCursor.Cancel:
+                if self.list[self.tmp_cursor] == ChangeCursor.Cancel:
                     self.tmp_cursor = None
 
-                elif self.list[self.tmp_cursor] == base.ChangeCursor.Change:
+                elif self.list[self.tmp_cursor] == ChangeCursor.Change:
                     self.rtn_cmd = self.tmp_cmd
 
             if pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_LEFT):
